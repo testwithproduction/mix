@@ -8,7 +8,7 @@ import argparse
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("mix-pic-batch.log"), logging.StreamHandler()],
+    handlers=[logging.FileHandler("mix-batch.log"), logging.StreamHandler()],
 )
 
 # Parse command line arguments
@@ -16,6 +16,12 @@ parser = argparse.ArgumentParser(description="Process image and audio files")
 parser.add_argument("batch_file", help="Path to batch file")
 parser.add_argument(
     "--duration", type=int, default=300, help="Duration of the video in seconds"
+)
+parser.add_argument(
+    "--type",
+    choices=["image", "video"],
+    default="image",
+    help="Type of media to process (image or video)",
 )
 args = parser.parse_args()
 
@@ -25,7 +31,8 @@ input_batch_file = args.batch_file
 PICTURES_DIR = "picture"
 AUDIO_DIR = "audio"
 VIDEO_DIR = "video"
-SCRIPT_PATH = "./mix-pic-audio.sh"
+FINAL_DIR = "final"
+SCRIPT_PATH = "./mix-pic-audio.sh" if args.type == "image" else "./mix-video-audio.sh"
 
 # Check if batch file exists
 if not os.path.exists(input_batch_file):
@@ -39,17 +46,23 @@ with open(input_batch_file, "r") as file:
         if not prefix:
             continue
 
-        # Check for image files
-        image_extensions = [".png", ".jpg"]
-        image_file = None
-        for ext in image_extensions:
-            possible_file = os.path.join(PICTURES_DIR, prefix + ext)
+        # Check for media files based on type
+        media_file = None
+        if args.type == "image":
+            extensions = [".png", ".jpg"]
+            search_dir = PICTURES_DIR
+        else:
+            extensions = [".mp4", ".mov"]
+            search_dir = VIDEO_DIR
+
+        for ext in extensions:
+            possible_file = os.path.join(search_dir, prefix + ext)
             if os.path.exists(possible_file):
-                image_file = possible_file
+                media_file = possible_file
                 break
 
-        if not image_file:
-            logging.warning(f"No image file found for prefix {prefix}")
+        if not media_file:
+            logging.warning(f"No {args.type} file found for prefix {prefix}")
             continue
 
         # Check for audio file
@@ -59,18 +72,18 @@ with open(input_batch_file, "r") as file:
             continue
 
         # Prepare output file
-        output_file = os.path.join(VIDEO_DIR, prefix + ".mp4")
+        output_file = os.path.join(FINAL_DIR, prefix + ".mp4")
 
         # Run the mix script
         try:
             with open("mix-pic-batch.log", "a") as log_file:
                 logging.info(
-                    f"Processing {prefix}...with {image_file},{audio_file} and duration {args.duration}"
+                    f"Processing {prefix}...with {media_file},{audio_file} and duration {args.duration}"
                 )
                 subprocess.run(
                     [
                         SCRIPT_PATH,
-                        image_file,
+                        media_file,
                         audio_file,
                         str(args.duration),
                         output_file,

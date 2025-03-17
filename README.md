@@ -10,6 +10,7 @@ This repository contains scripts designed to help with mixing and processing dif
 
 - `mix-pic-audio.sh`: Create video from a static image and audio file with specified duration
 - `mix-video-audio.sh`: Combine video with background audio, with loop support
+- `mix-batch.py`: Batch process multiple media files using predefined configurations
 
 ## Getting Started
 
@@ -26,7 +27,7 @@ The following dependencies are required:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/mix.git
+git clone https://github.com/testwithproduction/mix
 ```
 ## Usage
 
@@ -37,6 +38,12 @@ Create a video from a static image with looping background audio:
 ```
 
 Run each script without any paramters to see its usage.
+
+### mix-batch.py
+Process multiple media files in batch mode:
+```bash
+python mix-batch.py <batch_file> [--duration SECONDS] [--type TYPE]
+```
 
 ## Contributing
 
